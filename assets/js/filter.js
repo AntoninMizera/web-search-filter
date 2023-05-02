@@ -1,35 +1,31 @@
-import createButton, {filterBy, hookButton} from "./button.js";
+import createButton, {filterBy, hookButton, normalize} from "./button.js";
 
 document.addEventListener("DOMContentLoaded", () => {
-    const filterMap = {};
-    const references = document.querySelectorAll(".reference__list a[data-filter]");
+    const filterEntries = [];
+    const references = document.querySelectorAll(".reference__list a[data-filtertext]");
 
     for (const el of references) {
         if (!el.dataset.filter || !el.dataset.filtertext) continue;
 
-        const filters = el.dataset.filter.split(";");
         const filterTexts = el.dataset.filtertext.split(";");
-
-        for (let i = 0; i < filters.length; i++) {
-            if (Object.prototype.hasOwnProperty.call(filterMap, filters[i])) continue;
-
-            filterMap[filters[i]] = filterTexts[i];
-        }
+        filterEntries.push(...filterTexts.filter(x => !filterEntries.includes(x)));
     }
 
     const filters = document.querySelector(".reference__filters");
 
-    for (const el of filters.querySelectorAll("a[data-filter]")) {
+    for (const el of filters.querySelectorAll("a[data-filtertext]")) {
         hookButton(el);
     }
 
-    for (const [k, v] of Object.entries(filterMap)) {
-        filters.append(createButton(v, k));
+    for (const filterEntry of filterEntries) {
+        filters.append(createButton(filterEntry));
     }
 
     const urlSp = new URLSearchParams(window.location.search.slice(1));
 
-    if (urlSp.has("search") && (Object.keys(filterMap).includes(urlSp.get("search")) || urlSp.get("search") === "all")) {
+    if (urlSp.has("search") && (filterEntries
+        .find(x => normalize(x.toLowerCase()) === urlSp.get("search").toLowerCase()) ||
+        urlSp.get("search") === "all")) {
         filterBy(urlSp.get("search"));
     }
 });
