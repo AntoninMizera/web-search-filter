@@ -40,14 +40,11 @@ export function filterBy(name) {
 
         const filters = el.dataset.filtertext.split(";");
 
-        console.log(el, filters, name);
-
         // Allow both non-normalized and normalized forms
         if (!filters.find(n => normalize(n).toLowerCase() === normalize(name).toLowerCase())) {
             el.classList.add("hide");
-            console.log(el, filters, name, "not found");
         }
-        else console.log(el, filters, name, "found"), el.classList.remove("hide");
+        else el.classList.remove("hide");
     }
 
     for (const filter of filters) {
